@@ -1,70 +1,133 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { auth } from "@/FirebaseConfig";
+import { router } from "expo-router";
+import { TextInput } from "react-native";
+import LoginSignupForm from "@/components/LoginSingupForm";
 
-export default function HomeScreen() {
+const index = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const signIn = async (): Promise<void> => {
+    try {
+      const user = await signInWithEmailAndPassword(auth, email, password);
+      if (user) router.replace("/(tabs)/explore");
+    } catch (err: any) {
+      console.log(err);
+      alert("Sign in failed " + err.message);
+    }
+  };
+
+  const signUp = async (): Promise<void> => {
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, password);
+      if (user) router.replace("/(tabs)/explore");
+    } catch (err: any) {
+      console.log(err);
+      alert("Sign in failed " + err.message);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <LoginSignupForm
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      signIn={signIn}
+      signUp={signUp}
+    />
+    // <SafeAreaView style={styles.container}>
+    //   <Text style={styles.title}>Login</Text>
+    //   <TextInput
+    //     style={styles.input}
+    //     placeholder="Email"
+    //     value={email}
+    //     onChangeText={setEmail}
+    //     keyboardType="email-address"
+    //     autoCapitalize="none"
+    //   />
+    //   <TextInput
+    //     style={styles.input}
+    //     placeholder="Password"
+    //     value={password}
+    //     onChangeText={setPassword}
+    //     secureTextEntry
+    //   />
+    //   <TouchableOpacity style={styles.button} onPress={signIn}>
+    //     <Text style={styles.buttonText}>Login</Text>
+    //   </TouchableOpacity>
+    //   <TouchableOpacity
+    //     style={[styles.button, styles.signupButton]}
+    //     onPress={signUp}
+    //   >
+    //     <Text style={styles.buttonText}>Signup</Text>
+    //   </TouchableOpacity>
+    // </SafeAreaView>
+    // <SafeAreaView
+    //   style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+    // >
+    //   <Text>Login</Text>
+    //   <TextInput placeholder="email" value={email} onChangeText={setEmail} />
+    //   <TextInput
+    //     placeholder="password"
+    //     value={password}
+    //     onChangeText={setPassword}
+    //   />
+    //   <TouchableOpacity onPress={signIn}>
+    //     <Text>Login</Text>
+    //   </TouchableOpacity>
+    //   <TouchableOpacity onPress={signUp}>
+    //     <Text>Signup</Text>
+    //   </TouchableOpacity>
+    // </SafeAreaView>
   );
-}
+};
+
+export default index;
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    width: "100%",
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  signupButton: {
+    backgroundColor: "#34C759",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
